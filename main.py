@@ -50,23 +50,29 @@ RED_SPACESHIP_IMAGE = pygame.image.load(
 RED_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
     RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
 
+
+SPACE_BG = pygame.transform.scale(pygame.image.load(
+    os.path.join('Assets', 'bg.jpg')), (WIDTH, HEIGHT))
+
 SPACE = pygame.transform.scale(pygame.image.load(
     os.path.join('Assets', 'space.png')), (WIDTH, HEIGHT))
-
 
 def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
     WIN.blit(SPACE, (0, 0))
     pygame.draw.rect(WIN, MAGENTA, BORDER)
 
-    damage_text = DAMEGE_FONT.render("Poder de fogo: " + str(Damage), 1, YELLOW)
+    damage_text = DAMEGE_FONT.render("PODER DE FOGO: " + str(Damage), 1, YELLOW)
+    QUIT = DAMEGE_FONT.render("SAIR ", 1, WHITE)
+
     red_health_text = HEALTH_FONT.render(
-        "Integridade: " + str(red_health) + "%", 1, MAGENTA)
+        "INTEGRIDADE: " + str(red_health) + "%", 1, MAGENTA)
     yellow_health_text = HEALTH_FONT.render(
-        "Integridade: " + str(yellow_health) + "%", 1, MAGENTA)
+        "INTEGRIDADE: " + str(yellow_health) + "%", 1, MAGENTA)
 
     WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
     WIN.blit(yellow_health_text, (10, 10))
     WIN.blit(damage_text, (WIDTH - damage_text.get_width() - 10, 80))
+    WIN.blit(QUIT, (10, 80))
 
 
     WIN.blit(YELLOW_SPACESHIP, (yellow.x, yellow.y))
@@ -106,6 +112,8 @@ def press_mouse(mouse_pressed, mouse_pos, red, yellow, Damage):
     if mouse_pressed == (True, False, False):
         if mouse_pos[0] >= red.x and mouse_pos[0] <= red.x+50 and mouse_pos[1] >= red.y and mouse_pos[1] <= red.y+50:
             print("Clicado Vermelhor")
+            pygame.display.update()
+            main_menu()
 
         if mouse_pos[0] >= yellow.x and mouse_pos[0] <= yellow.x + 50 and mouse_pos[1] >= yellow.y and mouse_pos[1] <= yellow.y + 50:
             print("Clicado Amarelo")
@@ -147,6 +155,11 @@ def draw_menu(text):
     pygame.display.update()
     pygame.time.delay(7000)
 
+def circle_surf(radius, color):
+    surf = pygame.Surface((radius * 2, radius * 2))
+    pygame.draw.circle(surf, color, (radius, radius), radius)
+    surf.set_colorkey((0, 0, 0))
+    return surf
 
 def main():
     if MUSIC_SOUND.play() == False:
@@ -165,7 +178,9 @@ def main():
     clock = pygame.time.Clock()
     run = True
 
+
     while run:
+
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -220,16 +235,18 @@ def main():
 
     main()
 
-def get_font(size): # Returns Press-Start-2P in the desired size
+def get_font(size):
     return pygame.font.Font("assets/font.ttf", size)
 
 def main_menu():
+    # [loc, velocity, timer]
+    particles = []
     while True:
-        WIN.blit(SPACE, (0, 0))
+        WIN.blit(SPACE_BG, (0, 0))
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        MENU_TEXT = get_font(60).render("NERD BATTLE", True, "#b68f40")
+        MENU_TEXT = get_font(60).render("NERD BATTLE", True, MAGENTA)
         MENU_RECT = MENU_TEXT.get_rect(center=(450, 100))
 
         PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(450, 250),
@@ -238,6 +255,23 @@ def main_menu():
                              text_input="QUIT", font=get_font(30), base_color="#d7fcd4", hovering_color="White")
 
         WIN.blit(MENU_TEXT, MENU_RECT)
+
+
+        mx, my = pygame.mouse.get_pos()
+        particles.append([[mx, my], [random.randint(0, 20) / 10 - 1, -5], random.randint(6, 11)])
+
+        for particle in particles:
+            particle[0][0] += particle[1][0]
+            particle[0][1] += particle[1][1]
+            particle[2] -= 0.1
+            particle[1][1] += 0.15
+            pygame.draw.circle(WIN, (255, 255, 255), [int(particle[0][0]), int(particle[0][1])], int(particle[2]))
+
+            radius = particle[2] * 2
+            WIN.blit(circle_surf(radius, (20, 20, 60)), (int(particle[0][0] - radius), int(particle[0][1] - radius)),special_flags=pygame.BLEND_RGB_ADD)
+
+            if particle[2] <= 0:
+                particles.remove(particle)
 
         for button in [PLAY_BUTTON, QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
