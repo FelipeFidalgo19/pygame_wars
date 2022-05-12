@@ -1,4 +1,6 @@
 import random
+import sys
+from button import Button
 import pygame
 import os
 
@@ -100,6 +102,15 @@ def red_handle_movement(keys_pressed, red):
     if keys_pressed[pygame.K_DOWN] and red.y + VEL + red.height < HEIGHT - 15:  # DOWN
         red.y += VEL
 
+def press_mouse(mouse_pressed, mouse_pos, red, yellow, Damage):
+    if mouse_pressed == (True, False, False):
+        if mouse_pos[0] >= red.x and mouse_pos[0] <= red.x+50 and mouse_pos[1] >= red.y and mouse_pos[1] <= red.y+50:
+            print("Clicado Vermelhor")
+
+        if mouse_pos[0] >= yellow.x and mouse_pos[0] <= yellow.x + 50 and mouse_pos[1] >= yellow.y and mouse_pos[1] <= yellow.y + 50:
+            print("Clicado Amarelo")
+
+
 
 def handle_bullets(yellow_bullets, red_bullets, yellow, red):
     for bullet in yellow_bullets:
@@ -129,21 +140,27 @@ def draw_winner(text):
     pygame.time.delay(7000)
     WIN_SOUND.stop()
 
-def main():
+def draw_menu(text):
+    draw_text = WINNER_FONT.render(text, 1, WHITE)
+    WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() /
+                         2, HEIGHT/2 - draw_text.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(7000)
 
+
+def main():
     if MUSIC_SOUND.play() == False:
         MUSIC_SOUND.play()
 
     red = pygame.Rect(700, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
     yellow = pygame.Rect(100, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
 
-
-
     red_bullets = []
     yellow_bullets = []
 
     red_health = 100
     yellow_health = 100
+
 
     clock = pygame.time.Clock()
     run = True
@@ -187,9 +204,14 @@ def main():
             draw_winner(winner_text)
             break
 
+        mouse_pressed = pygame.mouse.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
+
         keys_pressed = pygame.key.get_pressed()
+
         yellow_handle_movement(keys_pressed, yellow)
         red_handle_movement(keys_pressed, red)
+        press_mouse(mouse_pressed, mouse_pos, red, yellow, Damage)
 
         handle_bullets(yellow_bullets, red_bullets, yellow, red)
 
@@ -198,7 +220,41 @@ def main():
 
     main()
 
+def get_font(size): # Returns Press-Start-2P in the desired size
+    return pygame.font.Font("assets/font.ttf", size)
 
-if __name__ == "__main__":
-    main()
+def main_menu():
+    while True:
+        WIN.blit(SPACE, (0, 0))
+
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+        MENU_TEXT = get_font(60).render("NERD BATTLE", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(450, 100))
+
+        PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(450, 250),
+                             text_input="PLAY", font=get_font(30), base_color="#d7fcd4", hovering_color="White")
+        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit Rect.png"), pos=(450, 400),
+                             text_input="QUIT", font=get_font(30), base_color="#d7fcd4", hovering_color="White")
+
+        WIN.blit(MENU_TEXT, MENU_RECT)
+
+        for button in [PLAY_BUTTON, QUIT_BUTTON]:
+            button.changeColor(MENU_MOUSE_POS)
+            button.update(WIN)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    main()
+                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
+
+main_menu()
 
