@@ -19,6 +19,9 @@ MAGENTA = (139, 0, 139)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 
+JUPTER_WIDTH, JUPTER_HEIGHT = 400, 385
+SATURN_WIDTH, SATURN_HEIGHT = 400, 385
+
 BORDER = pygame.Rect(WIDTH//2 - 2, 0, 1, HEIGHT)
 
 BULLET_HIT_SOUND = pygame.mixer.Sound('Assets/Grenade+1.mp3')
@@ -41,6 +44,16 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 YELLOW_HIT = pygame.USEREVENT + 1
 RED_HIT = pygame.USEREVENT + 2
 
+JUPTER_IMAGE = pygame.image.load(
+    os.path.join('Assets', 'jupter.png'))
+JUPTER_PLANET = pygame.transform.rotate(pygame.transform.scale(
+    JUPTER_IMAGE, (JUPTER_WIDTH, JUPTER_HEIGHT)), 180)
+
+SATURN_IMAGE = pygame.image.load(
+    os.path.join('Assets', 'saturn.png'))
+SATURN_PLANET = pygame.transform.rotate(pygame.transform.scale(
+    SATURN_IMAGE, (SATURN_WIDTH, SATURN_HEIGHT)), 180)
+
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(
     os.path.join('Assets', 'spaceship_yellow.png'))
 YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
@@ -61,10 +74,9 @@ SPACE_BG = pygame.transform.scale(pygame.image.load(
     os.path.join('Assets', 'bg.jpg')), (WIDTH, HEIGHT))
 
 SPACE = pygame.transform.scale(pygame.image.load(
-    os.path.join('Assets', 'space.jpg')), (WIDTH, HEIGHT))
+    os.path.join('Assets', 'space.png')), (WIDTH, HEIGHT))
 
 def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health, Damage, PSTONE_WIDTH):
-    WIN.blit(SPACE, (0, 0))
     pygame.draw.rect(WIN, MAGENTA, BORDER)
 
     damage_text = DAMEGE_FONT.render("PODER DE FOGO: " + str(Damage), 1, YELLOW)
@@ -161,7 +173,8 @@ def main():
 
     clock = pygame.time.Clock()
     run = True
-
+    i = 0
+    a = 0
     while run:
 
         clock.tick(FPS)
@@ -206,6 +219,15 @@ def main():
             draw_winner(winner_text)
             break
 
+        WIN.blit(SPACE, [i,0])
+        WIN.blit(SPACE, [-HEIGHT+i, 0])
+        WIN.blit(JUPTER_PLANET, (a, 20))
+        WIN.blit(SATURN_PLANET, (-HEIGHT+a, 20))
+
+        if i == HEIGHT:
+            i = 0
+        i += 0.5
+        a += 0.2
 
 
         keys_pressed = pygame.key.get_pressed()
